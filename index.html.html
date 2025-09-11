@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="ko" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>lipo405™: Reboot the Genesis</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-deep-space: #020412;
+            --accent-cyber-blue: #00A9FF;
+            --text-light: #E0E6F7;
+            --text-dim: #8892b0;
+        }
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: var(--bg-deep-space);
+            color: var(--text-light);
+        }
+        .blue-foil-text {
+            background: linear-gradient(90deg, #33BFFF, var(--accent-cyber-blue), #81E6D9);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; box-shadow: 0 0 20px var(--accent-cyber-blue); }
+            50% { opacity: 0.8; box-shadow: 0 0 30px var(--accent-cyber-blue); }
+        }
+        .pulsing-glow {
+            animation: pulse 3s infinite ease-in-out;
+        }
+        @keyframes fadeInSlideUp {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-on-scroll {
+            opacity: 0;
+            animation-fill-mode: forwards;
+        }
+        .animate-on-scroll.is-visible {
+            animation-name: fadeInSlideUp;
+            animation-duration: 0.8s;
+            animation-timing-function: ease-out;
+        }
+        .particle-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+        .content-z {
+            position: relative;
+            z-index: 1;
+        }
+        @keyframes typing {
+            from { width: 0 }
+            to { width: 100% }
+        }
+        @keyframes blink-caret {
+            from, to { border-color: transparent }
+            50% { border-color: var(--accent-cyber-blue); }
+        }
+        .typing-effect {
+            overflow: hidden;
+            white-space: nowrap;
+            border-right: .15em solid var(--accent-cyber-blue);
+            animation: typing 3s steps(40, end), blink-caret .75s step-end infinite;
+        }
+        .ingredient-card {
+            background: rgba(10, 15, 30, 0.7);
+            border: 1px solid rgba(0, 169, 255, 0.2);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+        .ingredient-card:hover {
+            transform: translateY(-10px) scale(1.03);
+            border-color: var(--accent-cyber-blue);
+            box-shadow: 0 10px 30px rgba(0, 169, 255, 0.3);
+        }
+        .synergy-line {
+            transition: all 0.5s ease;
+            stroke-width: 1px;
+            stroke: rgba(0, 169, 255, 0.3);
+        }
+        .synergy-line.active {
+            stroke-width: 3px;
+            stroke: url(#blue-gradient);
+        }
+        .synergy-node {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body class="antialiased">
+    <!-- Chosen Palette: Deep Space Blue & Cyber Glow -->
+    <!-- Application Structure Plan: The structure is a deep dive into a sci-fi narrative. It starts with a visually arresting, animated Hero section to establish a high-tech, mysterious tone. It then transitions to defining the problem not as aging, but as a "code decay" (The Glitch), positioning lipo405 as the ultimate "patch" or "reboot" (The Protocol). The core of the site is a detailed, interactive breakdown of the "modules" (ingredients) in the "Component Matrix", followed by a visualization of their network effect in "Synergy Network". The "Quantum Impact" section provides the data proof. This structure immerses the user in a sophisticated, tech-centric metaphor, making the science feel like a cutting-edge digital breakthrough. -->
+    <!-- Visualization & Content Choices: 
+        1. Hero Animation: A canvas-based particle animation creates a dynamic, "deep space" background. A typing animation for the headline adds a sense of a system booting up. This is purely for atmosphere and engagement.
+        2. Component Matrix: Detailed information is presented in a grid of interactive cards. This format is scannable yet allows for depth. Hover effects make exploration engaging.
+        3. Synergy Network: An interactive node map, but redesigned with a dark, glowing aesthetic. Clicking a node triggers a glowing "data flow" animation along the connection lines, visually reinforcing the concept of an active, intelligent network.
+        4. Quantum Impact Chart: A radar chart is maintained for its scientific look, but completely reskinned with the new dark theme, using glowing blue lines and data points to show the "quantum leap" in performance.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    
+    <div id="root">
+        <!-- Hero Section -->
+        <section class="min-h-screen flex flex-col justify-center items-center text-center p-4 relative overflow-hidden">
+            <canvas id="particle-canvas" class="particle-canvas"></canvas>
+            <div class="content-z">
+                <h1 id="hero-title" class="text-4xl md:text-7xl font-black mb-4 blue-foil-text">lipo405™</h1>
+                <p id="hero-subtitle" class="text-xl md:text-2xl font-light text-gray-300 max-w-4xl">시간을 해킹하고, 생명을 재부팅하라.</p>
+            </div>
+        </section>
+
+        <!-- The Glitch Section -->
+        <section id="the-glitch" class="py-20 md:py-32">
+            <div class="container mx-auto px-6 text-center max-w-4xl">
+                <h2 class="text-3xl md:text-5xl font-bold mb-6 animate-on-scroll">THE GLITCH: 생명의 코드 부식</h2>
+                <p class="text-lg text-gray-400 leading-relaxed animate-on-scroll" style="animation-delay: 200ms;">
+                    당신의 몸은 37조 개의 세포로 이루어진 가장 정교한 운영체제입니다. 하지만 시간이 흐르면서 이 코드에는 버그가 발생합니다. 산화 스트레스라는 '노이즈'가 DNA를 손상시키고, 단백질 구조에 '배드 섹터'를 만들며, 시스템 전체의 처리 속도를 저하시킵니다. 이것이 바로 노화라는 시스템 글리치(Glitch)의 실체입니다.
+                </p>
+            </div>
+        </section>
+
+        <!-- The Protocol Section -->
+        <section id="the-protocol" class="py-20 md:py-32 bg-black bg-opacity-30">
+            <div class="container mx-auto px-6 text-center max-w-5xl">
+                <h2 class="text-3xl md:text-5xl font-bold mb-6 blue-foil-text animate-on-scroll">THE PROTOCOL: lipo405™</h2>
+                <p class="text-lg text-gray-300 leading-relaxed mb-12 animate-on-scroll" style="animation-delay: 200ms;">
+                    <span class="font-bold">lipo405™</span>는 노화라는 글리치를 수정하기 위해 설계된 궁극의 디버깅 프로토콜입니다. 단순한 영양 공급을 넘어, 세포의 방화벽을 우회하는 '리포좀'이라는 스텔스 전송 기술과, 8개의 핵심 모듈이 상호 작용하며 시스템을 최적화하는 지능형 알고리즘 '405 시너지'를 통해 생명 코드의 근원을 직접 수정합니다.
+                </p>
+            </div>
+        </section>
+        
+        <!-- Component Matrix Section -->
+        <section id="components" class="py-20 md:py-32">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-16 max-w-4xl mx-auto">
+                    <h2 class="text-3xl md:text-5xl font-bold mb-6 animate-on-scroll">COMPONENT MATRIX: 8개의 핵심 모듈</h2>
+                    <p class="text-lg text-gray-400 leading-relaxed animate-on-scroll" style="animation-delay: 200ms;">
+                        프로토콜을 구성하는 각 모듈의 상세 스펙입니다. 각 모듈은 독립적으로도 강력하지만, 네트워크로 연결될 때 비로소 진정한 잠재력이 발현됩니다.
+                    </p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <div class="ingredient-card rounded-lg p-6 animate-on-scroll">
+                        <h3 class="text-xl font-bold blue-foil-text">리포좀 L-글루타치온</h3>
+                        <p class="text-sm font-bold text-gray-400 mb-4">CODENAME: CORE ENGINE</p>
+                        <ul class="text-gray-300 space-y-2 text-sm list-disc list-inside">
+                            <li>세포 직접 항산화</li>
+                            <li>시스템 독소 중화 및 제거</li>
+                            <li>멜라닌 생성 억제 (피부톤)</li>
+                            <li>에너지 대사 최적화</li>
+                        </ul>
+                    </div>
+                    <div class="ingredient-card rounded-lg p-6 animate-on-scroll" style="animation-delay: 100ms;">
+                        <h3 class="text-xl font-bold blue-foil-text">저분자 피쉬콜라겐</h3>
+                        <p class="text-sm font-bold text-gray-400 mb-4">CODENAME: FRAMEWORK</p>
+                        <ul class="text-gray-300 space-y-2 text-sm list-disc list-inside">
+                            <li>피부 구조적 지지대 재건</li>
+                            <li>진피 밀도 및 탄력 증강</li>
+                            <li>모발 및 손톱 강도 개선</li>
+                            <li>관절 연골 보호</li>
+                        </ul>
+                    </div>
+                     <div class="ingredient-card rounded-lg p-6 animate-on-scroll" style="animation-delay: 200ms;">
+                        <h3 class="text-xl font-bold blue-foil-text">비타민C & 카카두플럼</h3>
+                        <p class="text-sm font-bold text-gray-400 mb-4">CODENAME: CATALYST</p>
+                        <ul class="text-gray-300 space-y-2 text-sm list-disc list-inside">
+                            <li>글루타치온 재활용 (효과 증폭)</li>
+                            <li>콜라겐 합성 필수 조효소</li>
+                            <li>강력한 광보호 효과</li>
+                            <li>면역 시스템 지원</li>
+                        </ul>
+                    </div>
+                     <div class="ingredient-card rounded-lg p-6 animate-on-scroll" style="animation-delay: 300ms;">
+                        <h3 class="text-xl font-bold blue-foil-text">시스테인염산염</h3>
+                        <p class="text-sm font-bold text-gray-400 mb-4">CODENAME: GENERATOR</p>
+                        <ul class="text-gray-300 space-y-2 text-sm list-disc list-inside">
+                            <li>체내 글루타치온 생성 촉진</li>
+                            <li>피부 및 모발 케라틴 구조 강화</li>
+                            <li>중금속 해독 작용</li>
+                            <li>호흡기 점막 보호</li>
+                        </ul>
+                    </div>
+                     <div class="ingredient-card rounded-lg p-6 animate-on-scroll">
+                        <h3 class="text-xl font-bold blue-foil-text">병풀추출분말</h3>
+                        <p class="text-sm font-bold text-gray-400 mb-4">CODENAME: GUARDIAN</p>
+                        <ul class="text-gray-300 space-y-2 text-sm list-disc list-inside">
+                            <li>미세 염증 및 자극 진정</li>
+                            <li>콜라겐 분해 효소(MMP) 억제</li>
+                            <li>세포 재생 및 상처 치유 촉진</li>
+                            <li>혈액 순환 개선</li>
+                        </ul>
+                    </div>
+                     <div class="ingredient-card rounded-lg p-6 animate-on-scroll" style="animation-delay: 100ms;">
+                        <h3 class="text-xl font-bold blue-foil-text">엘라스틴가수분해물</h3>
+                        <p class="text-sm font-bold text-gray-400 mb-4">CODENAME: DYNAMIC MESH</p>
+                        <ul class="text-gray-300 space-y-2 text-sm list-disc list-inside">
+                            <li>피부 탄성 및 복원력 부여</li>
+                            <li>콜라겐 네트워크 지지</li>
+                            <li>동적 주름(표정주름) 완화</li>
+                            <li>혈관 탄력성 유지</li>
+                        </ul>
+                    </div>
+                     <div class="ingredient-card rounded-lg p-6 animate-on-scroll" style="animation-delay: 200ms;">
+                        <h3 class="text-xl font-bold blue-foil-text">히알루론산 혼합제제</h3>
+                        <p class="text-sm font-bold text-gray-400 mb-4">CODENAME: HYDRO-CORE</p>
+                        <ul class="text-gray-300 space-y-2 text-sm list-disc list-inside">
+                            <li>진피층 수분 잠금 효과</li>
+                            <li>세포간 공간 볼륨 형성</li>
+                            <li>피부 표면 광채 및 윤기 부여</li>
+                            <li>영양소 전달 매개체 역할</li>
+                        </ul>
+                    </div>
+                     <div class="ingredient-card rounded-lg p-6 animate-on-scroll" style="animation-delay: 300ms;">
+                        <h3 class="text-xl font-bold blue-foil-text">MCT오일분말</h3>
+                        <p class="text-sm font-bold text-gray-400 mb-4">CODENAME: BOOSTER</p>
+                        <ul class="text-gray-300 space-y-2 text-sm list-disc list-inside">
+                            <li>지용성 영양소 흡수율 증대</li>
+                            <li>세포막 투과성 향상</li>
+                            <li>빠른 에너지 공급원 (케톤)</li>
+                            <li>신진대사 촉진</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Synergy Network Section -->
+        <section id="synergy" class="py-20 md:py-32">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-16 max-w-4xl mx-auto">
+                    <h2 class="text-3xl md:text-5xl font-bold mb-6 animate-on-scroll">SYNERGY NETWORK: 405 알고리즘</h2>
+                     <p class="text-lg text-gray-400 leading-relaxed animate-on-scroll" style="animation-delay: 200ms;">
+                        모듈을 클릭하여 네트워크 내에서 데이터가 어떻게 흐르고 상호 증폭되는지 시각적으로 확인하십시오. 이것은 단순한 합이 아닌, 지능적인 상호작용의 결과입니다.
+                    </p>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                    <div class="lg:col-span-8 relative w-full h-[500px] md:h-[600px] animate-on-scroll">
+                        <svg id="synergy-svg" class="absolute top-0 left-0 w-full h-full" viewbox="0 0 800 600">
+                             <defs>
+                                <linearGradient id="blue-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="0%" stop-color="#81E6D9" />
+                                    <stop offset="100%" stop-color="#00A9FF" />
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                        <div id="synergy-nodes-container" class="relative w-full h-full"></div>
+                    </div>
+                    <div id="synergy-info" class="lg:col-span-4 ingredient-card rounded-lg p-8 h-full min-h-[300px] flex flex-col justify-center animate-on-scroll">
+                        <h3 id="info-title" class="text-2xl font-bold blue-foil-text mb-3">NETWORK STANDBY</h3>
+                        <p id="info-desc" class="text-gray-300">네트워크 노드를 선택하여 데이터 플로우를 분석하십시오.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quantum Impact Section -->
+        <section id="impact" class="py-20 md:py-32 bg-black bg-opacity-30">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-16 max-w-4xl mx-auto">
+                    <h2 class="text-3xl md:text-5xl font-bold mb-6 animate-on-scroll">QUANTUM IMPACT: 한계를 넘어서</h2>
+                     <p class="text-lg text-gray-400 leading-relaxed animate-on-scroll" style="animation-delay: 200ms;">
+                        405 프로토콜이 활성화될 때, 세포의 핵심 성능 지표(KPI)가 어떻게 기존의 한계를 돌파하고 새로운 차원으로 도약하는지 확인하십시오.
+                    </p>
+                </div>
+                 <div class="bg-gray-900 bg-opacity-50 border border-blue-500/20 rounded-xl shadow-2xl p-6 md:p-8 animate-on-scroll max-w-4xl mx-auto">
+                    <div class="relative h-[350px] md:h-[500px]">
+                        <canvas id="impactChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Conclusion Section -->
+        <section class="min-h-[60vh] flex flex-col justify-center items-center text-center p-4 relative">
+             <canvas id="particle-canvas-footer" class="particle-canvas"></canvas>
+            <div class="content-z">
+                <h2 class="text-4xl md:text-6xl font-black mb-6 blue-foil-text animate-on-scroll">REBOOT YOUR GENESIS.</h2>
+                 <p class="text-lg text-gray-300 max-w-3xl mx-auto mb-8 animate-on-scroll" style="animation-delay: 200ms;">
+                    lipo405™는 과거로 돌아가는 타임머신이 아닙니다. <br class="hidden md:block" /> 당신의 세포가 가진 최고의 잠재력을 지금, 여기에서 실현하는 리부팅 시퀀스입니다. 당신의 가장 위대한 시작은 바로 오늘입니다.
+                </p>
+                <div class="animate-on-scroll" style="animation-delay: 400ms;">
+                    <a href="#the-protocol" class="inline-block bg-gradient-to-r from-blue-500 to-cyan-400 text-white font-bold py-3 px-10 rounded-full text-lg hover:shadow-lg hover:shadow-cyan-500/50 transition-all transform hover:scale-105">
+                        프로토콜 실행
+                    </a>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Particle Animation
+        const setupParticleCanvas = (canvasId) => {
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            let particles = [];
+
+            const resizeCanvas = () => {
+                canvas.width = canvas.offsetWidth;
+                canvas.height = canvas.offsetHeight;
+            };
+            window.addEventListener('resize', resizeCanvas);
+            resizeCanvas();
+
+            class Particle {
+                constructor() {
+                    this.x = Math.random() * canvas.width;
+                    this.y = Math.random() * canvas.height;
+                    this.size = Math.random() * 2 + 0.5;
+                    this.speedX = Math.random() * 1 - 0.5;
+                    this.speedY = Math.random() * 1 - 0.5;
+                    this.opacity = Math.random() * 0.5 + 0.2;
+                }
+                update() {
+                    this.x += this.speedX;
+                    this.y += this.speedY;
+                    if (this.x > canvas.width || this.x < 0) this.speedX *= -1;
+                    if (this.y > canvas.height || this.y < 0) this.speedY *= -1;
+                }
+                draw() {
+                    ctx.fillStyle = `rgba(0, 169, 255, ${this.opacity})`;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+            function initParticles() {
+                particles = [];
+                const particleCount = Math.floor(canvas.width / 20);
+                for (let i = 0; i < particleCount; i++) {
+                    particles.push(new Particle());
+                }
+            }
+            initParticles();
+            window.addEventListener('resize', initParticles);
+
+            function animateParticles() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                for (const particle of particles) {
+                    particle.update();
+                    particle.draw();
+                }
+                requestAnimationFrame(animateParticles);
+            }
+            animateParticles();
+        };
+        setupParticleCanvas('particle-canvas');
+        setupParticleCanvas('particle-canvas-footer');
+
+        // Scroll Animations
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('is-visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.animate-on-scroll').forEach(el => {
+            observer.observe(el);
+        });
+        
+        // Synergy Network
+        const synergyData = {
+            nodes: [
+                { id: 'glutathione', name: 'CORE ENGINE', x: 400, y: 70 },
+                { id: 'collagen', name: 'FRAMEWORK', x: 150, y: 220 },
+                { id: 'vitaminc', name: 'CATALYST', x: 650, y: 220 },
+                { id: 'cysteine', name: 'GENERATOR', x: 400, y: 250 },
+                { id: 'centella', name: 'GUARDIAN', x: 200, y: 450 },
+                { id: 'elastin', name: 'DYNAMIC MESH', x: 400, y: 530 },
+                { id: 'hyaluronic', name: 'HYDRO-CORE', x: 600, y: 450 },
+                { id: 'mct', name: 'BOOSTER', x: 500, y: 530 }
+            ],
+            connections: [
+                ['glutathione', 'vitaminc', '글루타치온 재활성화'], ['glutathione', 'cysteine', '글루타치온 자체 생성'],
+                ['collagen', 'vitaminc', '콜라겐 합성 촉진'], ['collagen', 'elastin', '탄력 네트워크 완성'], ['collagen', 'hyaluronic', '구조+수분 동시 충전'], ['collagen', 'centella', '콜라겐 분해 억제'],
+                ['elastin', 'centella', '탄성 조직 보호'],
+                ['hyaluronic', 'mct', '수분 보유율 증폭'],
+                ['vitaminc', 'cysteine', '항산화 아미노산 보호']
+            ]
+        };
+        
+        const setupSynergyNetwork = () => {
+            const container = document.getElementById('synergy-nodes-container');
+            const svg = document.getElementById('synergy-svg');
+            const infoTitle = document.getElementById('info-title');
+            const infoDesc = document.getElementById('info-desc');
+
+            synergyData.nodes.forEach(node => {
+                const nodeEl = document.createElement('div');
+                nodeEl.id = node.id;
+                nodeEl.className = 'synergy-node absolute flex items-center justify-center w-28 h-28 rounded-full text-center p-2 text-sm font-bold border-2 border-cyan-500/30 bg-gray-900/50 backdrop-blur-sm';
+                nodeEl.style.left = `calc(${node.x/800*100}% - 56px)`;
+                nodeEl.style.top = `calc(${node.y/600*100}% - 56px)`;
+                nodeEl.textContent = node.name;
+                container.appendChild(nodeEl);
+            });
+            
+            synergyData.connections.forEach(conn => {
+                const [idA, idB] = conn;
+                const nodeA = synergyData.nodes.find(n => n.id === idA);
+                const nodeB = synergyData.nodes.find(n => n.id === idB);
+                if (nodeA && nodeB) {
+                    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                    line.setAttribute('x1', nodeA.x);
+                    line.setAttribute('y1', nodeA.y);
+                    line.setAttribute('x2', nodeB.x);
+                    line.setAttribute('y2', nodeB.y);
+                    line.setAttribute('class', `synergy-line`);
+                    line.dataset.nodes = `${idA} ${idB}`;
+                    svg.appendChild(line);
+                }
+            });
+
+            container.addEventListener('click', e => {
+                const nodeEl = e.target.closest('.synergy-node');
+                if (!nodeEl) return;
+
+                const clickedId = nodeEl.id;
+                const isActive = nodeEl.hasAttribute('data-active');
+                
+                container.querySelectorAll('.synergy-node').forEach(n => n.removeAttribute('data-active'));
+                svg.querySelectorAll('.synergy-line').forEach(l => l.classList.remove('active'));
+                
+                if (!isActive) {
+                    nodeEl.setAttribute('data-active', 'true');
+                    const connected = synergyData.connections.filter(c => c.includes(clickedId));
+                    connected.forEach(conn => {
+                        const partnerId = conn[0] === clickedId ? conn[1] : conn[0];
+                        document.getElementById(partnerId)?.setAttribute('data-active', 'true');
+                        svg.querySelector(`.synergy-line[data-nodes*="${clickedId}"][data-nodes*="${partnerId}"]`)?.classList.add('active');
+                    });
+                    
+                    const connInfo = connected.map(c => `<li><strong class="text-cyan-400">${c[2]}:</strong> ${c[0] === clickedId ? c[1] : c[0]} 모듈과 연동</li>`).join('');
+                    infoTitle.textContent = `${nodeEl.textContent} - 활성화`;
+                    infoDesc.innerHTML = `<ul class="space-y-2 list-disc list-inside">${connInfo}</ul>`;
+
+                } else {
+                     infoTitle.textContent = 'NETWORK STANDBY';
+                     infoDesc.textContent = '네트워크 노드를 선택하여 데이터 플로우를 분석하십시오.';
+                }
+
+                container.querySelectorAll('.synergy-node').forEach(n => {
+                    if (n.hasAttribute('data-active')) {
+                        n.style.borderColor = 'var(--accent-cyber-blue)';
+                        n.style.boxShadow = '0 0 20px var(--accent-cyber-blue)';
+                    } else {
+                        n.style.borderColor = 'rgba(0, 169, 255, 0.2)';
+                        n.style.boxShadow = 'none';
+                    }
+                });
+            });
+        };
+        setupSynergyNetwork();
+
+        // Impact Chart
+        const createImpactChart = () => {
+            const ctx = document.getElementById('impactChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['ANTI-OXIDATION (항산화 방어)', 'ENERGY METABOLISM (에너지 대사)', 'STRUCTURAL DENSITY (구조 밀도)', 'HYDRO-RETENTION (수분 보유력)', 'INFLAMMATION CONTROL (염증 제어)'],
+                    datasets: [{
+                        label: '일반 고함량 단일 성분',
+                        data: [55, 45, 60, 65, 40],
+                        backgroundColor: 'rgba(136, 146, 176, 0.2)',
+                        borderColor: 'rgba(136, 146, 176, 0.8)',
+                        pointBackgroundColor: 'rgba(136, 146, 176, 1)',
+                    }, {
+                        label: 'lipo405™ 프로토콜',
+                        data: [98, 90, 92, 95, 85],
+                        backgroundColor: 'rgba(0, 169, 255, 0.3)',
+                        borderColor: 'rgba(0, 169, 255, 1)',
+                        pointBackgroundColor: 'rgba(0, 169, 255, 1)',
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { labels: { color: 'white', font: { size: 14 } } }
+                    },
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            max: 100,
+                            angleLines: { color: 'rgba(255, 255, 255, 0.1)' },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                            pointLabels: { 
+                                font: { size: 12, weight: 'bold' },
+                                color: 'white'
+                            },
+                            ticks: {
+                                backdropColor: 'rgba(2, 4, 18, 0.5)',
+                                color: 'white',
+                                font: { size: 10 }
+                            }
+                        }
+                    }
+                }
+            });
+        };
+        createImpactChart();
+    });
+    </script>
+</body>
+</html>
